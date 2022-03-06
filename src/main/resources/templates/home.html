@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Covid Tracker Application</title>
+    <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css} "/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css">
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <h1>Covid Tacker</h1>
+    <p>This application lists the current number of cases reported across the globe</p>
+    <div class="jumbotron">
+        <h1 class="display-4" th:text="${totalReportedCases}"></h1>
+        <p class="lead">Total cases reported as of today</p>
+    </div>
+    <div>
+        <canvas id="lineChart" class="mb-5 mt-5" style="height: 100px; width: 600px"></canvas>
+    </div>
+    <div id='table'></div>
+    </div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var list = /*[[${locationStats}]]*/ "locationStats";
+    var graphLabels=/*[[${graph}]]*/ "graph";
+    var graphData=/*[[${lastOneWeek}]]*/ "graphData"
+    /*]]>*/
+    var myData=[];
+    for(i=0;i<list.length;i++){
+        var innerList=[]
+        innerList.push(list[i].state);
+        innerList.push(list[i].country);
+        innerList.push(list[i].latestTotalCases);
+        innerList.push(list[i].diffFromPrevDay);
+        myData.push(innerList)
+    }
+    var ctxL = document.getElementById("lineChart").getContext('2d');
+    var myLineChart = new Chart(ctxL, {
+        type: 'line',
+        data: {
+            labels: graphLabels,
+            datasets: [{
+                label: "Past One Week Global Report",
+                data: graphData,
+                backgroundColor: [
+                    'rgba(105, 0, 132, .2)',
+                ],
+                borderColor: [
+                    'rgba(200, 99, 132, .7)',
+                ],
+                borderWidth: 2
+            },
+            ]
+        },
+        options: {
+            responsive: true
+        }
+    });
+    new gridjs.Grid({
+        columns: ['State', 'Country','Total Cases Reported','Changes Since Last Date'],
+        search: true,
+        data:myData,
+        sort: true,
+        pagination: {
+            enabled: true,
+            limit: 25,
+            summary: false
+        }
+    }).render(document.getElementById('table'));
+</script>
+</body>
+</html>
